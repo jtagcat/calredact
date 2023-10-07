@@ -43,6 +43,8 @@ func main() {
 		pass = readPass(user)
 	}
 
+	skipNames := strings.Split(os.Getenv("IGNORE"), "¤")
+
 	ctx := context.Background()
 	ctx, _ = signal.NotifyContext(ctx, os.Interrupt)
 
@@ -50,7 +52,7 @@ func main() {
 	router := gin.Default()
 
 	router.GET("/redacted.ics", ginutil.HandlerWithErr(func(c *gin.Context, g *ginutil.Context) (status int, _ string) {
-		redactedEvents, err := getCalendar(backend, user, pass, c.Query("eventName"))
+		redactedEvents, err := getCalendar(backend, user, pass, c.Query("eventName"), skipNames)
 		if err != nil {
 			slog.Error("getting backend", std.SlogErr(err))
 			return http.StatusBadGateway, ""
@@ -74,7 +76,7 @@ func main() {
 	ginutil.RunWithContext(ctx, router)
 }
 
-func getCalendar(backend, user, pass, eventName string) (redactedEvents []*ical.Component, _ error) {
+func getCalendar(backend, user, pass, setName string, skipNames []string) (redactedEvents []*ical.Component, _ error) {
 	c, err := caldav.NewClient(webdav.HTTPClientWithBasicAuth(http.DefaultClient, user, pass), backend)
 	if err != nil {
 		return nil, fmt.Errorf("creating client: %w", err)
@@ -130,8 +132,15 @@ func getCalendar(backend, user, pass, eventName string) (redactedEvents []*ical.
 		}
 
 		for _, e := range events {
+			for _, igName := range skipNames {
+				if evName := e.Props.Get("SUMMARY"); evName != nil &&
+					evName.Value == igName {
+					continue
+				}
+			}
+
 			redacted := redactComponent(e.Component)
-			redacted.Props.Set(&ical.Prop{Name: "SUMMARY", Value: eventName})
+			redacted.Props.Set(&ical.Prop{Name: "SUMMARY", Value: setName})
 
 			redactedEvents = append(redactedEvents, redacted)
 		}
