@@ -6,7 +6,7 @@ require (
 	github.com/emersion/go-ical v0.0.0-20220601085725-0864dccc089f
 	github.com/emersion/go-webdav v0.4.0
 	github.com/gin-gonic/gin v1.9.1
-	github.com/jtagcat/util v0.0.0-20231007044914-8d6d7a45d7cf
+	github.com/jtagcat/util v0.0.0-20231007060258-7eb88c095565
 	golang.org/x/term v0.13.0
 )
 

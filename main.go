@@ -33,14 +33,20 @@ func readPass(user string) string {
 func main() {
 	backend, user := os.Getenv("BACKEND"), os.Getenv("USER")
 	if backend == "" || user == "" {
-		slog.Error("BACKEND and USER must be both set")
+		slog.Error("BACKEND and USER environments must be both set")
 		os.Exit(64)
 	}
 
-	passB, err := os.ReadFile("/secrets/password")
-	pass := string(passB)
+	pass, err := std.ReadFile("secrets/password")
 	if err != nil {
-		pass = readPass(user)
+		slog.Error("Password file must exist", std.SlogErr(err), slog.String("path", "secrets/password"))
+		os.Exit(64)
+	}
+
+	authKey, err := std.ReadFile("secrets/authkey")
+	if err != nil {
+		slog.Error("Authkey file must exist", std.SlogErr(err), slog.String("path", "secrets/authkey"))
+		os.Exit(64)
 	}
 
 	skipNames := strings.Split(os.Getenv("IGNORE"), "¤")
@@ -52,6 +58,10 @@ func main() {
 	router := gin.Default()
 
 	router.GET("/redacted.ics", ginutil.HandlerWithErr(func(c *gin.Context, g *ginutil.Context) (status int, _ string) {
+		if c.Query("auth") != authKey {
+			return http.StatusForbidden, ""
+		}
+
 		redactedEvents, err := getCalendar(backend, user, pass, c.Query("eventName"), skipNames)
 		if err != nil {
 			slog.Error("getting backend", std.SlogErr(err))

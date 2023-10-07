@@ -38,6 +38,8 @@ github.com/jtagcat/util v0.0.0-20231007043626-e5d25c8f3ad3 h1:BgRmE4Rq6w5mSX9RMv
 github.com/jtagcat/util v0.0.0-20231007043626-e5d25c8f3ad3/go.mod h1:i/F8IHfZJtmpCqXvuE45351UlvZqyorUmURu2we8HtU=
 github.com/jtagcat/util v0.0.0-20231007044914-8d6d7a45d7cf h1:lDyB3UQpddc+a/+LsdBkbR422jd0xZceKk/8aGjpyQ4=
 github.com/jtagcat/util v0.0.0-20231007044914-8d6d7a45d7cf/go.mod h1:i/F8IHfZJtmpCqXvuE45351UlvZqyorUmURu2we8HtU=
+github.com/jtagcat/util v0.0.0-20231007060258-7eb88c095565 h1:w7SvmAkp6OQBWGxNLvvZCpx1g24Tr/weDnZ0o8CR/mI=
+github.com/jtagcat/util v0.0.0-20231007060258-7eb88c095565/go.mod h1:i/F8IHfZJtmpCqXvuE45351UlvZqyorUmURu2we8HtU=
 github.com/klauspost/cpuid/v2 v2.0.9/go.mod h1:FInQzS24/EEf25PyTYn52gqo7WaD8xa0213Md/qVLRg=
 github.com/klauspost/cpuid/v2 v2.2.4 h1:acbojRNwl3o09bUq+yDCtZFc1aiwaAAxtcn8YkZXnvk=
 github.com/klauspost/cpuid/v2 v2.2.4/go.mod h1:RVVoqg1df56z8g3pUjL/3lE5UfnlrJX8tyFgg4nqhuY=
