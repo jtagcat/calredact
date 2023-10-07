@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/signal"
 	"strings"
+	"time"
 
 	"github.com/emersion/go-ical"
 	"github.com/emersion/go-webdav"
@@ -40,8 +41,8 @@ func main() {
 		os.Exit(64)
 	}
 
-	ctx := context.Background()
-	ctx, _ = signal.NotifyContext(ctx, os.Interrupt)
+	gctx := context.Background()
+	gctx, _ = signal.NotifyContext(gctx, os.Interrupt)
 
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
@@ -51,7 +52,10 @@ func main() {
 			return http.StatusForbidden, ""
 		}
 
-		redactedEvents, err := getCalendar(backend, user, pass, c.Query("eventName"), skipNames)
+		ctx, cancel := context.WithTimeout(gctx, 20*time.Second)
+		defer cancel()
+
+		redactedEvents, err := getCalendar(ctx, backend, user, pass, c.Query("eventName"), skipNames)
 		if err != nil {
 			slog.Error("getting backend", std.SlogErr(err))
 			return http.StatusBadGateway, ""
@@ -72,26 +76,26 @@ func main() {
 	}))
 
 	slog.Info("file access", slog.String("path", "/redacted.ics"))
-	ginutil.RunWithContext(ctx, router)
+	ginutil.RunWithContext(gctx, router)
 }
 
-func getCalendar(backend, user, pass, setName string, skipNames []string) (redactedEvents []*ical.Component, _ error) {
+func getCalendar(ctx context.Context,backend, user, pass, setName string, skipNames []string) (redactedEvents []*ical.Component, _ error) {
 	c, err := caldav.NewClient(webdav.HTTPClientWithBasicAuth(http.DefaultClient, user, pass), backend)
 	if err != nil {
 		return nil, fmt.Errorf("creating client: %w", err)
 	}
 
-	userPrincipal, err := c.FindCurrentUserPrincipal()
+	userPrincipal, err := c.FindCurrentUserPrincipal(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("finding user principal: %w", err)
 	}
 
-	homeSet, err := c.FindCalendarHomeSet(userPrincipal)
+	homeSet, err := c.FindCalendarHomeSet(ctx, userPrincipal)
 	if err != nil {
 		return nil, fmt.Errorf("finding home set: %w", err)
 	}
 
-	calendars, err := c.FindCalendars(homeSet)
+	calendars, err := c.FindCalendars(ctx, homeSet)
 	if err != nil {
 		return nil, fmt.Errorf("finding calendars: %w", err)
 	}
@@ -99,7 +103,7 @@ func getCalendar(backend, user, pass, setName string, skipNames []string) (redac
 		return nil, fmt.Errorf("no calendars found")
 	}
 
-	resp, err := c.QueryCalendar(calendars[0].Path, &caldav.CalendarQuery{
+	resp, err := c.QueryCalendar(ctx, calendars[0].Path, &caldav.CalendarQuery{
 		CompFilter: caldav.CompFilter{
 			Name: "VCALENDAR",
 			Comps: []caldav.CompFilter{
@@ -114,7 +118,7 @@ func getCalendar(backend, user, pass, setName string, skipNames []string) (redac
 	}
 
 	for _, icsEvent := range resp {
-		req, err := http.NewRequest(http.MethodGet, std.URLJoinNoErr(backend, icsEvent.Path), nil)
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, std.URLJoinNoErr(backend, icsEvent.Path), nil)
 		if err != nil {
 			return nil, fmt.Errorf("crafting ics request: %w", err)
 		}

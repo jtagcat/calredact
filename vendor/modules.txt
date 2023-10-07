@@ -31,7 +31,7 @@ github.com/chenzhuoyu/iasm/x86_64
 # github.com/emersion/go-ical v0.0.0-20220601085725-0864dccc089f
 ## explicit; go 1.13
 github.com/emersion/go-ical
-# github.com/emersion/go-webdav v0.4.0 => github.com/jtagcat/go-webdav v0.0.0-20231007024806-ddccc08bcaaf
+# github.com/emersion/go-webdav v0.4.0 => github.com/jtagcat/go-webdav v0.0.0-20231007063015-0271ed486176
 ## explicit; go 1.13
 github.com/emersion/go-webdav
 github.com/emersion/go-webdav/caldav
@@ -174,4 +174,4 @@ google.golang.org/protobuf/runtime/protoiface
 # gopkg.in/yaml.v3 v3.0.1
 ## explicit
 gopkg.in/yaml.v3
-# github.com/emersion/go-webdav => github.com/jtagcat/go-webdav v0.0.0-20231007024806-ddccc08bcaaf
+# github.com/emersion/go-webdav => github.com/jtagcat/go-webdav v0.0.0-20231007063015-0271ed486176

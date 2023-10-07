@@ -2,6 +2,7 @@ package internal
 
 import (
 	"bytes"
+	"context"
 	"encoding/xml"
 	"fmt"
 	"io"
@@ -131,7 +132,7 @@ func (c *Client) DoMultiStatus(req *http.Request) (*MultiStatus, error) {
 	return &ms, nil
 }
 
-func (c *Client) PropFind(path string, depth Depth, propfind *PropFind) (*MultiStatus, error) {
+func (c *Client) PropFind(ctx context.Context, path string, depth Depth, propfind *PropFind) (*MultiStatus, error) {
 	req, err := c.NewXMLRequest("PROPFIND", path, propfind)
 	if err != nil {
 		return nil, err
@@ -139,12 +140,14 @@ func (c *Client) PropFind(path string, depth Depth, propfind *PropFind) (*MultiS
 
 	req.Header.Add("Depth", depth.String())
 
+	req.WithContext(ctx)
+
 	return c.DoMultiStatus(req)
 }
 
 // PropfindFlat performs a PROPFIND request with a zero depth.
-func (c *Client) PropFindFlat(path string, propfind *PropFind) (*Response, error) {
-	ms, err := c.PropFind(path, DepthZero, propfind)
+func (c *Client) PropFindFlat(ctx context.Context, path string, propfind *PropFind) (*Response, error) {
+	ms, err := c.PropFind(ctx, path, DepthZero, propfind)
 	if err != nil {
 		return nil, err
 	}
@@ -174,11 +177,13 @@ func parseCommaSeparatedSet(values []string, upper bool) map[string]bool {
 	return m
 }
 
-func (c *Client) Options(path string) (classes map[string]bool, methods map[string]bool, err error) {
+func (c *Client) Options(ctx context.Context, path string) (classes map[string]bool, methods map[string]bool, err error) {
 	req, err := c.NewRequest(http.MethodOptions, path, nil)
 	if err != nil {
 		return nil, nil, err
 	}
+
+	req.WithContext(ctx)
 
 	resp, err := c.Do(req)
 	if err != nil {
@@ -196,7 +201,7 @@ func (c *Client) Options(path string) (classes map[string]bool, methods map[stri
 }
 
 // SyncCollection perform a `sync-collection` REPORT operation on a resource
-func (c *Client) SyncCollection(path, syncToken string, level Depth, limit *Limit, prop *Prop) (*MultiStatus, error) {
+func (c *Client) SyncCollection(ctx context.Context, path, syncToken string, level Depth, limit *Limit, prop *Prop) (*MultiStatus, error) {
 	q := SyncCollectionQuery{
 		SyncToken: syncToken,
 		SyncLevel: level.String(),
@@ -208,6 +213,8 @@ func (c *Client) SyncCollection(path, syncToken string, level Depth, limit *Limi
 	if err != nil {
 		return nil, err
 	}
+
+	req.WithContext(ctx)
 
 	ms, err := c.DoMultiStatus(req)
 	if err != nil {

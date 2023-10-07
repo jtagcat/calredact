@@ -38,4 +38,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/emersion/go-webdav => github.com/jtagcat/go-webdav v0.0.0-20231007024806-ddccc08bcaaf
+replace github.com/emersion/go-webdav => github.com/jtagcat/go-webdav v0.0.0-20231007063015-0271ed486176
