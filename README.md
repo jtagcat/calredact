@@ -7,8 +7,8 @@ USER=sus
 IGNORE=event1¤event two¤Third thing
 ```
 
-Password is read from `secrets/password` (Container: `/secrets/password`)
-Auth key is read from `secrets/authkey` (Container: `/secrets/authkey`)
+- Password is read from `secrets/password` (Container: `/secrets/password`)
+- Auth key is read from `secrets/authkey` (Container: `/secrets/authkey`)
 
 ```
 http://localhost:8080/redacted.ics?auth=authKeyHere&eventName=Generic Title
