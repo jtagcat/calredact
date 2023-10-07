@@ -7,7 +7,6 @@ require (
 	github.com/emersion/go-webdav v0.4.0
 	github.com/gin-gonic/gin v1.9.1
 	github.com/jtagcat/util v0.0.0-20231007060258-7eb88c095565
-	golang.org/x/term v0.13.0
 )
 
 require (

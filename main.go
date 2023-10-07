@@ -10,7 +10,6 @@ import (
 	"os"
 	"os/signal"
 	"strings"
-	"syscall"
 
 	"github.com/emersion/go-ical"
 	"github.com/emersion/go-webdav"
@@ -18,19 +17,11 @@ import (
 	"github.com/gin-gonic/gin"
 	ginutil "github.com/jtagcat/util/gin"
 	"github.com/jtagcat/util/std"
-	"golang.org/x/term"
 )
 
-// https://dev.to/tidalcloud/interactive-cli-prompts-in-go-3bj9
-func readPass(user string) string {
-	fmt.Fprintf(os.Stderr, "%q password: ", user)
-	b, _ := term.ReadPassword(int(syscall.Stdin))
-
-	fmt.Println()
-	return string(b)
-}
-
 func main() {
+	skipNames := strings.Split(os.Getenv("IGNORE"), "¤")
+
 	backend, user := os.Getenv("BACKEND"), os.Getenv("USER")
 	if backend == "" || user == "" {
 		slog.Error("BACKEND and USER environments must be both set")
@@ -48,8 +39,6 @@ func main() {
 		slog.Error("Authkey file must exist", std.SlogErr(err), slog.String("path", "secrets/authkey"))
 		os.Exit(64)
 	}
-
-	skipNames := strings.Split(os.Getenv("IGNORE"), "¤")
 
 	ctx := context.Background()
 	ctx, _ = signal.NotifyContext(ctx, os.Interrupt)
@@ -159,8 +148,9 @@ func getCalendar(backend, user, pass, setName string, skipNames []string) (redac
 	return
 }
 
-func decodeEvents(r io.Reader) (events []ical.Event, _ error) {
+func decodeEvents(r io.ReadCloser) (events []ical.Event, _ error) {
 	dec := ical.NewDecoder(r)
+	defer r.Close()
 
 	for {
 		cal, err := dec.Decode()
