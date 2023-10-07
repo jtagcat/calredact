@@ -1,4 +1,6 @@
 # calredact
+Pulls calendar from CalDAV backend, redacts data, serves as `.ics`.
+
 ```
 BACKEND=https://caldav
 USER=sus
