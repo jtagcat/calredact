@@ -13,3 +13,10 @@ IGNORE=event1¤event two¤Third thing
 ```
 http://localhost:8080/redacted.ics?auth=authKeyHere&eventName=Generic Title
 ```
+
+## Updating dependencies
+```
+go get -u ./...
+go mod vendor
+```
+(+ commit + docker build)
