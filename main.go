@@ -11,6 +11,8 @@ import (
 	"os/signal"
 	"strings"
 	"time"
+	"net/url"
+	"crypto/tls"
 
 	"github.com/emersion/go-ical"
 	"github.com/emersion/go-webdav"
@@ -81,8 +83,12 @@ func main() {
 	ginutil.RunWithContext(gctx, router)
 }
 
-func getCalendar(ctx context.Context,backend, user, pass, setName string, skipNames []string) (redactedEvents []*ical.Component, _ error) {
-	c, err := caldav.NewClient(webdav.HTTPClientWithBasicAuth(http.DefaultClient, user, pass), backend)
+func getCalendar(ctx context.Context, backend, user, pass, setName string, skipNames []string) (redactedEvents []*ical.Component, _ error) {
+	// DEBUG:
+	proxyUrl, _ := url.Parse("http://127.0.0.1:8081")
+	myClient := &http.Client{Transport: &http.Transport{Proxy: http.ProxyURL(proxyUrl), TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}}
+
+	c, err := caldav.NewClient(webdav.HTTPClientWithBasicAuth(myClient, user, pass), backend)
 	if err != nil {
 		return nil, fmt.Errorf("creating client: %w", err)
 	}
