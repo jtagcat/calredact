@@ -265,4 +265,8 @@ var REDACT = map[string]bool{
 	// Non-RFC
 	"X-MOZ-LASTACK":    false,
 	"X-MOZ-GENERATION": false,
+	"X-WR-ALARMUID": false,
+	"X-APPLE-DEFAULT-ALARM": false,
+	"X-APPLE-CREATOR-IDENTITY": false, // creating app name
+	"X-APPLE-CREATOR-TEAM-IDENTITY": false,
 }
