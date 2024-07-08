@@ -34,12 +34,14 @@ func main() {
 		slog.Error("Password file must exist", std.SlogErr(err), slog.String("path", "secrets/password"))
 		os.Exit(64)
 	}
+	pass = strings.TrimSpace(pass)
 
 	authKey, err := std.ReadFile("secrets/authkey")
 	if err != nil {
 		slog.Error("Authkey file must exist", std.SlogErr(err), slog.String("path", "secrets/authkey"))
 		os.Exit(64)
 	}
+	authKey = strings.TrimSpace(authKey)
 
 	gctx := context.Background()
 	gctx, _ = signal.NotifyContext(gctx, os.Interrupt)
