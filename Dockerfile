@@ -1,4 +1,4 @@
-FROM golang:1.22 AS build
+FROM golang:1.23 AS build
 
 WORKDIR /go/src/app
 
@@ -8,7 +8,7 @@ RUN go mod download
 COPY . .
 RUN CGO_ENABLED=0 go build -o /go/bin/calredact
 
-FROM gcr.io/distroless/static-debian11
+FROM gcr.io/distroless/static-debian12
 LABEL org.opencontainers.image.source="https://github.com/jtagcat/calredact"
 
 COPY --from=build /go/bin/calredact /
