@@ -169,7 +169,9 @@ func (c *compiler) compileBasic(vt reflect.Type) decFunc {
 	case reflect.Struct:
 		return c.compileStruct(vt)
 	default:
-		panic(&json.UnmarshalTypeError{Type: vt})
+		return &unsupportedTypeDecoder{
+			typ: rt.UnpackType(vt),
+		}
 	}
 }
 
@@ -177,7 +179,7 @@ func (c *compiler) compilePtr(vt reflect.Type) decFunc {
 	c.enter(vt)
 	defer c.exit(vt)
 
-	// specail logic for Named Ptr, issue 379
+	// special logic for Named Ptr, issue 379
 	if reflect.PtrTo(vt.Elem()) != vt {
 		c.namedPtr = true
 		return &ptrDecoder{
@@ -399,7 +401,7 @@ func tryCompileKeyUnmarshaler(vt reflect.Type) decKey {
 		return decodeKeyTextUnmarshaler
 	}
 
-	/* not support map key with `json.Unmarshaler` */
+	/* NOTE: encoding/json not support map key with `json.Unmarshaler` */
 	return nil
 }
 
@@ -413,6 +415,11 @@ func (c *compiler) compileMapKey(vt reflect.Type) decKey {
 		return decodeKeyU8
 	case reflect.Uint16:
 		return decodeKeyU16
+	// NOTE: actually, encoding/json can't use float as map key
+	case reflect.Float32:
+		return decodeFloat32Key
+	case reflect.Float64:
+		return decodeFloat64Key
 	default:
 		panic(&json.UnmarshalTypeError{Type: vt})
 	}
@@ -432,7 +439,7 @@ func (c *compiler) tryCompilePtrUnmarshaler(vt reflect.Type, strOpt bool) decFun
 
 	/* check for `encoding.TextMarshaler` with pointer receiver */
 	if pt.Implements(encodingTextUnmarshalerType) {
-		/* TextUnmarshal not support ,strig tag */
+		/* TextUnmarshal not support, string tag */
 		if strOpt {
 			panicForInvalidStrType(vt)
 		}
